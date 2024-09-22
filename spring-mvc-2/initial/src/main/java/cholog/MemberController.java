@@ -7,53 +7,55 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class MemberController {
 
-    private final List<Member> members = new ArrayList<>();
-    private final AtomicLong index = new AtomicLong(1);
+    private List<Member> members = new ArrayList<>();
+    private AtomicLong index = new AtomicLong(1);  // 인덱스 값 자동 증가
 
+    // 멤버 생성
     @PostMapping("/members")
-    public ResponseEntity<Void> create() {
-        // TODO: member 정보를 받아서 생성한다.
-        Member newMember = Member.toEntity(null, index.getAndIncrement());
+    public ResponseEntity<Void> create(@RequestBody Member member) {
+        // ID를 자동 증가시키며 새로운 멤버 생성
+        Member newMember = Member.toEntity(member, index.getAndIncrement());
         members.add(newMember);
+        // 생성된 멤버의 URI 반환
         return ResponseEntity.created(URI.create("/members/" + newMember.getId())).build();
     }
 
+    // 모든 멤버 조회
     @GetMapping("/members")
     public ResponseEntity<List<Member>> read() {
-        // TODO: 저장된 모든 member 정보를 반환한다.
-        return null;
+        return ResponseEntity.ok().body(members);
     }
 
+    // 특정 멤버 수정
     @PutMapping("/members/{id}")
-    public ResponseEntity<Void> update() {
-        // TODO: member의 수정 정보와 url 상의 id 정보를 받아 member 정보를 수정한다.
+    public ResponseEntity<Void> update(@RequestBody Member newMember, @PathVariable Long id) {
+        // ID로 멤버 찾기
         Member member = members.stream()
-            .filter(it -> Objects.equals(it.getId(), null))
-            .findFirst()
-            .orElseThrow(RuntimeException::new);
+                .filter(it -> Objects.equals(it.getId(), id))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
-        member.update(null);
-        return null;
+        // 멤버 정보 수정
+        member.update(newMember);
+        return ResponseEntity.ok().build();
     }
 
+    // 특정 멤버 삭제
     @DeleteMapping("/members/{id}")
-    public ResponseEntity<Void> delete() {
-        // TODO: url 상의 id 정보를 받아 member를 삭제한다.
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        // ID로 멤버 찾기, 없으면 예외 발생
         Member member = members.stream()
-            .filter(it -> Objects.equals(it.getId(), null))
-            .findFirst()
-            .orElseThrow(RuntimeException::new);
+                .filter(it -> Objects.equals(it.getId(), id))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
+        // 멤버 삭제
         members.remove(member);
-
-        return null;
+        return ResponseEntity.noContent().build();
     }
 }
