@@ -1,34 +1,26 @@
 package cholog;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
 
-    public Person() {
-
-    }
+    @OneToOne(mappedBy = "person")
+    private Author author;
 
     public Person(String name) {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Person() {
 
-    public String getName() {
-        return name;
-    }
-
-    public Author getAuthor() {
-        return null;
     }
 }

@@ -6,6 +6,7 @@ public class Member {
     private int age;
 
     public Member() {
+
     }
 
     public Member(Long id, String name, int age) {
